@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>La Maison — Restaurante</title>
+<meta name="description" content="La Maison — App web de pedidos, reservas y panel administrativo para restaurante.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-container">
+  <div class="login-left">
+    <svg class="ll-ornament" viewBox="0 0 80 80" fill="none">
+      <ellipse cx="40" cy="22" rx="10" ry="18" stroke="#c9960a" stroke-width="1.5" fill="none"/>
+      <ellipse cx="40" cy="22" rx="10" ry="18" stroke="#c9960a" stroke-width="1.5" fill="none" transform="rotate(60 40 40)"/>
+      <ellipse cx="40" cy="22" rx="10" ry="18" stroke="#c9960a" stroke-width="1.5" fill="none" transform="rotate(120 40 40)"/>
+      <circle cx="40" cy="40" r="4" fill="#e8b020" opacity=".85"/>
+    </svg>
+    <div class="ll-title">La Maison</div>
+    <div class="ll-sub">Restaurante</div>
+    <div class="ll-div"><div class="ll-dot"></div></div>
+    <div class="ll-quote">Una experiencia única<br>en cada visita.</div>
+    <div class="ll-info">Medellín, Colombia<br>Reservas desde 1998</div>
+  </div>
+  <div class="login-right">
+    <div class="login-box">
+      <div class="login-tabs">
+        <button class="tab-btn active" onclick="switchTab('login',this)">Iniciar sesión</button>
+        <button class="tab-btn" onclick="switchTab('register',this)">Registrarse</button>
+      </div>
+      <!-- Login -->
+      <div class="form-section active" id="section-login">
+        <div class="form-ttl">Bienvenido de vuelta</div>
+        <div class="form-sub">Inicia sesión para gestionar tu pedido</div>
+        <label class="flabel">Usuario</label>
+        <input type="text" id="loginUser" placeholder="Tu usuario" autocomplete="username">
+        <label class="flabel">Contraseña</label>
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+        <span class="forgot" onclick="openRecuperar()">¿Olvidaste tu contraseña?</span>
+        <button class="btn-pri" onclick="login()">Iniciar sesión</button>
+      </div>
+      <!-- Registro -->
+      <div class="form-section" id="section-register">
+        <div class="form-ttl">Crear cuenta</div>
+        <div class="form-sub">Únete y disfruta de nuestra experiencia</div>
+        <label class="flabel">Nombre de usuario</label>
+        <input type="text" id="registerUser" placeholder="Tu nombre" autocomplete="username">
+        <label class="flabel">Contraseña</label>
+        <input type="password" id="registerPass" placeholder="••••••••" autocomplete="new-password">
+        <label class="flabel">Pregunta de seguridad: ¿Nombre de tu mascota?</label>
+        <input type="text" id="registerSec" placeholder="Respuesta secreta">
+        <button class="btn-pri" onclick="register()">Registrarse</button>
+      </div>
+      <p id="mensaje"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP CLIENTE ══ -->
+<div id="app">
+  <header>
+    <div class="logo">La Maison</div>
+    <div class="hdr-right">
+      <span class="hdr-user" id="headerUser"></span>
+      <button class="mis-pedidos-btn" onclick="openMisPedidos()">📋 Mis pedidos</button>
+      <button class="btn-perfil" onclick="openPerfil()">👤 <span>Perfil</span></button>
+      <button class="cart-icon" onclick="toggleCart()">🛒 <span id="cartCount">0</span></button>
+      <button class="btn-salir" onclick="salir()">← Salir</button>
+    </div>
+  </header>
+  <section class="hero">
+    <h1>Nuestro Menú</h1>
+    <p>Selecciona tus platos y realiza tu pedido.</p>
+  </section>
+
+  <!-- ══ LED TICKER ══ -->
+  <div class="led-ticker-wrap">
+    <div class="led-ticker-track" id="ledTrack"></div>
+  </div>
+  <div class="menu-label-bar">✦ MENÚ ✦</div>
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterProducts('todos',this)">Todos</button>
+    <button class="filter-btn" onclick="filterProducts('Tradicional',this)">🍲 Tradicionales</button>
+    <button class="filter-btn" onclick="filterProducts('Sopas',this)">🥣 Sopas</button>
+    <button class="filter-btn" onclick="filterProducts('BBQ',this)">🥩 BBQ</button>
+    <button class="filter-btn" onclick="filterProducts('FastFood',this)">🍔 Fast Food</button>
+  </div>
+  <div class="container">
+    <div class="menu-grid" id="menuContainer"></div>
+  </div>
+</div>
+
+<!-- ══ PANEL ADMIN ══ -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <div class="logo">La Maison</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="admin-badge">👑 ADMIN</span>
+      <button class="btn-salir" onclick="salir()">← Salir</button>
+    </div>
+  </div>
+  <div class="admin-hero">
+    <h1>Panel de Administración</h1>
+    <p>Gestiona el restaurante desde aquí</p>
+  </div>
+
+  <!-- Pestañas admin -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchAdminTab('productos',this)">🍽️ Productos</button>
+    <button class="admin-tab" onclick="switchAdminTab('usuarios',this)">👥 Usuarios</button>
+    <button class="admin-tab" onclick="switchAdminTab('pedidos',this)">📦 Pedidos</button>
+    <button class="admin-tab" onclick="switchAdminTab('mesas',this)">🪑 Mesas</button>
+  </div>
+
+  <!-- Vista: Productos -->
+  <div class="admin-view active" id="admin-view-productos">
+    <div class="admin-container">
+      <div class="admin-section-title">➕ Agregar nuevo producto</div>
+      <div class="admin-form">
+        <input type="text" id="np-name" placeholder="Nombre del plato">
+        <div class="admin-form-row">
+          <select id="np-cat">
+            <option value="">Categoría…</option>
+            <option value="Tradicional">🍲 Tradicional</option>
+            <option value="Sopas">🥣 Sopas</option>
+            <option value="BBQ">🥩 BBQ</option>
+            <option value="FastFood">🍔 Fast Food</option>
+          </select>
+          <input type="number" id="np-price" placeholder="Precio (ej: 25000)">
+        </div>
+        <input type="text" id="np-img" placeholder="URL de imagen (opcional)">
+        <textarea id="np-desc" placeholder="Descripción breve del plato…"></textarea>
+        <input type="text" id="np-badge" placeholder="Badge especial (ej: 🔥 Especial) — opcional">
+        <button class="btn-admin-add" onclick="addProduct()">✓ Agregar producto</button>
+        <p id="admin-msg" style="margin-top:10px;font-size:13px;min-height:16px"></p>
+      </div>
+      <div class="admin-section-title">📋 Productos actuales</div>
+      <div class="admin-product-list" id="adminProductList"></div>
+    </div>
+  </div>
+
+  <!-- Vista: Usuarios -->
+  <div class="admin-view" id="admin-view-usuarios">
+    <div class="admin-container">
+      <div class="stats-row" id="adminStatsRow"></div>
+      <div class="admin-section-title">👥 Usuarios registrados</div>
+      <div class="user-list" id="adminUserList"></div>
+    </div>
+  </div>
+
+  <!-- Vista: Pedidos -->
+  <div class="admin-view" id="admin-view-pedidos">
+    <div class="admin-container">
+      <div class="admin-section-title">📦 Pedidos activos y recientes</div>
+      <div class="orders-list" id="adminOrdersList"></div>
+    </div>
+  </div>
+
+  <!-- Vista: Mesas y Reservas -->
+  <div class="admin-view" id="admin-view-mesas">
+    <div class="admin-container">
+      <div class="admin-section-title">🪑 Estado de Mesas</div>
+      <div class="admin-mesa-grid" id="adminMesasGrid"></div>
+      <div class="admin-section-title" style="margin-top:24px">📅 Reservas activas</div>
+      <div class="orders-list" id="adminReservasList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOTÓN FLOTANTE PEDIDO ACTIVO ══ -->
+<button id="fab-pedido" onclick="show('deliveryModal')">
+  🛵 Pedido en camino — <span class="fab-timer" id="fabTimer">30:00</span>
+</button>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="toggleCart()"></div>
+
+<!-- ══ CARRITO ══ -->
+<div class="cart-modal" id="cartModal">
+  <div class="cart-header">
+    <h3>Tu Pedido</h3>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">Tu carrito está vacío<br>¡Agrega platos!</div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-value" id="cartTotal">$ 0</span>
+    </div>
+    <div class="delivery-toggle">
+      <button class="del-btn active" id="btn-recoger" onclick="setDelivery('recoger')">🏠 Recoger</button>
+      <button class="del-btn" id="btn-domicilio" onclick="setDelivery('domicilio')">🛵 Domicilio</button>
+    </div>
+    <div id="recoger-form">
+      <!-- Tabs internos -->
+      <div class="rec-tabs">
+        <button class="rec-tab active" id="rectab-comer" onclick="setRecTab('comer')">🍽️ Comer aquí</button>
+        <button class="rec-tab" id="rectab-reservar" onclick="setRecTab('reservar')">📅 Reservar</button>
+      </div>
+
+      <!-- Panel: Comer aquí -->
+      <div class="rec-panel active" id="recpanel-comer">
+        <input class="dom-input" type="text" id="rec-nombre" placeholder="Nombre del cliente">
+        <input class="dom-input" type="tel" id="rec-celular" placeholder="Número de celular">
+        <span class="pago-lbl">Tipo de pago</span>
+        <div class="pago-toggle" id="rec-pago-toggle">
+          <button class="pago-btn active" id="rec-pago-efectivo" onclick="setRecPago('efectivo')">💵 Efectivo<br><small style="font-weight:400;font-size:10px">Contra entrega</small></button>
+          <button class="pago-btn" id="rec-pago-credito" onclick="setRecPago('credito')">💳 Crédito<br><small style="font-weight:400;font-size:10px">Tarjeta / transferencia</small></button>
+        </div>
+        <span class="mesa-lbl">🪑 Selecciona tu mesa</span>
+        <div class="mesa-grid" id="mesa-grid-comer">
+          <button class="mesa-btn active" id="mesa-1" onclick="setMesa(1)">🪑 Mesa 1<br><small style="font-weight:400;font-size:10px">Ventana</small></button>
+          <button class="mesa-btn" id="mesa-2" onclick="setMesa(2)">🪑 Mesa 2<br><small style="font-weight:400;font-size:10px">Centro</small></button>
+          <button class="mesa-btn" id="mesa-3" onclick="setMesa(3)">🪑 Mesa 3<br><small style="font-weight:400;font-size:10px">Terraza</small></button>
+          <button class="mesa-btn" id="mesa-4" onclick="setMesa(4)">🪑 Mesa 4<br><small style="font-weight:400;font-size:10px">Fondo</small></button>
+        </div>
+      </div>
+
+      <!-- Panel: Reservar -->
+      <div class="rec-panel" id="recpanel-reservar">
+        <input class="dom-input" type="text" id="res-nombre" placeholder="Nombre de quien reserva">
+        <input class="dom-input" type="tel" id="res-celular" placeholder="Número de celular">
+        <input class="dom-input" type="time" id="res-hora" placeholder="Hora de llegada">
+        <select class="dom-input" id="res-personas" style="appearance:auto">
+          <option value="">¿Cuántas personas?</option>
+          <option value="1">1 persona</option>
+          <option value="2">2 personas</option>
+          <option value="3">3 personas</option>
+          <option value="4">4 personas</option>
+          <option value="5">5 personas</option>
+          <option value="6">6 personas</option>
+          <option value="7">7 personas</option>
+          <option value="8">8 o más personas</option>
+        </select>
+        <span class="mesa-lbl">🪑 Selecciona la mesa a reservar</span>
+        <div class="mesa-grid" id="mesa-grid-reservar">
+          <button class="mesa-btn active" id="resmesa-1" onclick="setResMesa(1)">🪑 Mesa 1<br><small style="font-weight:400;font-size:10px">Ventana</small></button>
+          <button class="mesa-btn" id="resmesa-2" onclick="setResMesa(2)">🪑 Mesa 2<br><small style="font-weight:400;font-size:10px">Centro</small></button>
+          <button class="mesa-btn" id="resmesa-3" onclick="setResMesa(3)">🪑 Mesa 3<br><small style="font-weight:400;font-size:10px">Terraza</small></button>
+          <button class="mesa-btn" id="resmesa-4" onclick="setResMesa(4)">🪑 Mesa 4<br><small style="font-weight:400;font-size:10px">Fondo</small></button>
+        </div>
+        <span class="pago-lbl">Tipo de pago</span>
+        <div class="pago-toggle">
+          <button class="pago-btn active" id="res-pago-efectivo" onclick="setResPago('efectivo')">💵 Efectivo</button>
+          <button class="pago-btn" id="res-pago-credito" onclick="setResPago('credito')">💳 Crédito</button>
+        </div>
+      </div>
+    </div>
+    <div id="domicilio-form">
+      <input class="dom-input" type="text" id="dom-nombre" placeholder="Nombre del cliente">
+      <input class="dom-input" type="tel" id="dom-celular" placeholder="Número de celular">
+      <input class="dom-input" type="text" id="dom-direccion" placeholder="Dirección de entrega">
+      <span class="pago-lbl">Tipo de pago</span>
+      <div class="pago-toggle">
+        <button class="pago-btn active" id="pago-efectivo" onclick="setPago('efectivo')">💵 Efectivo<br><small style="font-weight:400;font-size:10px">Contra entrega</small></button>
+        <button class="pago-btn" id="pago-credito" onclick="setPago('credito')">💳 Crédito<br><small style="font-weight:400;font-size:10px">Tarjeta / transferencia</small></button>
+      </div>
+    </div>
+    <button class="checkout-btn" onclick="checkout()">💬 Pedir por WhatsApp</button>
+  </div>
+</div>
+
+<!-- ══ MODAL DOMICILIO + TIMERS ══ -->
+<div class="modal-bg" id="deliveryModal">
+  <div class="modal-box">
+    <div class="modal-icon">🛵</div>
+    <div class="modal-title" id="modal-title">¡Pedido en camino!</div>
+    <div class="cancel-bar" id="cancelBar" style="display:none">
+      <span>⏰ Puedes cancelar en:</span>
+      <span class="cancel-countdown" id="cancelCountdown">05:00</span>
+      <button class="btn-cancel-order" onclick="cancelOrder()">✕ Cancelar pedido</button>
+    </div>
+    <div class="modal-info" id="modal-info"></div>
+    <div class="timers-row" id="timersRow">
+      <div class="timer-block">
+        <div class="timer-ring">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle class="tr-bg" cx="48" cy="48" r="40"/>
+            <circle class="tr-countdown" id="circC" cx="48" cy="48" r="40"/>
+          </svg>
+          <div class="timer-num tn-c" id="numC">30:00</div>
+        </div>
+        <div class="timer-lbl">⏳ Tiempo restante</div>
+      </div>
+      <div class="timer-block">
+        <div class="timer-ring">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle class="tr-bg" cx="48" cy="48" r="40"/>
+            <circle class="tr-elapsed" id="circE" cx="48" cy="48" r="40"/>
+          </svg>
+          <div class="timer-num tn-e" id="numE">00:00</div>
+        </div>
+        <div class="timer-lbl">⏱ Tiempo transcurrido</div>
+      </div>
+    </div>
+    <div class="entregado-msg" id="entregadoMsg">✅ ¡Entregado!</div>
+    <div class="entregado-sub" id="entregadoSub">Tu pedido ha llegado. ¡Buen provecho!</div>
+    <button class="modal-close-btn" onclick="closeDeliveryModal()">Cerrar</button>
+  </div>
+</div>
+
+<!-- ══ MODAL RECUPERAR CONTRASEÑA ══ -->
+<div class="modal-bg" id="recModal">
+  <div class="modal-box rec-box" style="text-align:left">
+    <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--lbg);margin-bottom:6px">🔑 Recuperar contraseña</div>
+    <div style="font-size:13px;color:#7c6fa0;margin-bottom:20px">Ingresa tu usuario y responde la pregunta de seguridad.</div>
+    <div class="rec-step active" id="rec-step1">
+      <label class="flabel">Nombre de usuario</label>
+      <input type="text" id="rec-user" placeholder="Tu usuario">
+      <label class="flabel">¿Nombre de tu mascota?</label>
+      <input type="text" id="rec-sec" placeholder="Tu respuesta secreta">
+      <div class="rec-msg err" id="rec-msg1"></div>
+      <div class="rec-actions">
+        <button class="btn-sec" onclick="closeRecuperar()">Cancelar</button>
+        <button class="btn-main" onclick="recStep2()">Continuar →</button>
+      </div>
+    </div>
+    <div class="rec-step" id="rec-step2">
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;font-size:13px;color:#166534;margin-bottom:16px">✓ Identidad verificada. Ya puedes cambiar tu contraseña.</div>
+      <label class="flabel">Nueva contraseña</label>
+      <input type="password" id="rec-newpass" placeholder="Nueva contraseña">
+      <label class="flabel">Confirmar contraseña</label>
+      <input type="password" id="rec-newpass2" placeholder="Repite la contraseña">
+      <div class="rec-msg" id="rec-msg2"></div>
+      <div class="rec-actions">
+        <button class="btn-sec" onclick="closeRecuperar()">Cancelar</button>
+        <button class="btn-main" onclick="recSave()">Guardar contraseña</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL PERFIL ══ -->
+<div class="modal-bg" id="perfilModal">
+  <div class="modal-box perfil-box" style="text-align:left">
+    <div class="perfil-avatar" id="perfilAvatar">?</div>
+    <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--lbg);margin-bottom:4px;text-align:center" id="perfilNombreDisplay"></div>
+    <div style="font-size:13px;color:#7c6fa0;margin-bottom:18px;text-align:center">Tu cuenta en La Maison</div>
+    <div class="perfil-section">Cambiar nombre de usuario</div>
+    <input type="text" id="perf-newuser" placeholder="Nuevo nombre de usuario">
+    <div class="perfil-section">Cambiar contraseña</div>
+    <input type="password" id="perf-oldpass" placeholder="Contraseña actual">
+    <input type="password" id="perf-newpass" placeholder="Nueva contraseña">
+    <input type="password" id="perf-newpass2" placeholder="Confirmar nueva contraseña">
+    <div class="perfil-section">Pregunta de seguridad</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">¿Nombre de tu mascota?</div>
+    <input type="text" id="perf-sec" placeholder="Nueva respuesta secreta (dejar vacío para no cambiar)">
+    <div class="perfil-msg" id="perfil-msg"></div>
+    <div class="rec-actions">
+      <button class="btn-sec" onclick="closePerfil()">Cancelar</button>
+      <button class="btn-main" onclick="savePerfil()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL FACTURA ══ -->
+<div class="invoice-modal-bg" id="invoiceModal">
+  <div class="invoice-box">
+    <div class="invoice-header">
+      <div class="invoice-logo">La Maison</div>
+      <div class="invoice-title">Factura Electrónica</div>
+      <div class="invoice-num" id="invoice-num"></div>
+    </div>
+    <div class="invoice-body" id="invoice-body"></div>
+    <div class="invoice-footer">
+      La Maison Restaurante · Medellín, Colombia<br>
+      Esta es una representación de tu comprobante de pedido.
+      <br><button class="btn-invoice-close" onclick="closeInvoice()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL MIS PEDIDOS ══ -->
+<div class="mis-pedidos-modal-bg" id="misPedidosModal">
+  <div class="mis-pedidos-box">
+    <div class="mis-pedidos-header">
+      <h3>📋 Mis Pedidos</h3>
+      <button class="cart-close" onclick="closeMisPedidos()" style="color:#c4b5fd">✕</button>
+    </div>
+    <div class="mis-pedidos-body" id="misPedidosBody"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL EDITAR PRODUCTO ══ -->
+<div class="edit-modal-bg" id="editModal">
+  <div class="edit-modal-box">
+    <div class="edit-modal-title">✏️ Editar producto</div>
+    <input type="hidden" id="edit-id">
+    <input type="text" id="edit-name" placeholder="Nombre">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <select id="edit-cat">
+        <option value="Tradicional">🍲 Tradicional</option>
+        <option value="Sopas">🥣 Sopas</option>
+        <option value="BBQ">🥩 BBQ</option>
+        <option value="FastFood">🍔 Fast Food</option>
+      </select>
+      <input type="number" id="edit-price" placeholder="Precio">
+    </div>
+    <input type="text" id="edit-img" placeholder="URL imagen">
+    <textarea id="edit-desc" placeholder="Descripción"></textarea>
+    <input type="text" id="edit-badge" placeholder="Badge (opcional)">
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+      <div class="agotado-toggle" style="background:#f0fdf4;border-color:#86efac">
+        <label for="edit-disponible" style="color:#166534;cursor:pointer;flex:1;font-family:'Lato',sans-serif;font-size:14px;font-weight:700">✅ Marcar como disponible</label>
+        <input type="checkbox" id="edit-disponible" style="width:18px;height:18px;accent-color:#16a34a;cursor:pointer" onchange="if(this.checked)document.getElementById('edit-agotado').checked=false">
+      </div>
+      <div class="agotado-toggle">
+        <label for="edit-agotado">🚫 Marcar como agotado</label>
+        <input type="checkbox" id="edit-agotado" onchange="if(this.checked)document.getElementById('edit-disponible').checked=false">
+      </div>
+    </div>
+    <div class="edit-modal-actions">
+      <button class="btn-cancel-edit" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn-save-edit" onclick="saveEdit()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
